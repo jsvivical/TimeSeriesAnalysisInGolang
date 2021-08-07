@@ -1,8 +1,6 @@
-module github.com/test
+module github.com/example_EWMA
 
 go 1.16
-
-replace github.com/smoothingMethod => ../smoothingMethod
 
 require (
 	github.com/evaluation v0.0.0-00010101000000-000000000000
@@ -11,3 +9,5 @@ require (
 )
 
 replace github.com/evaluation => ../evaluation
+
+replace github.com/smoothingMethod => ../smoothingMethod

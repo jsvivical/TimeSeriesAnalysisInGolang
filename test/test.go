@@ -8,6 +8,8 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/evaluation"
+	"github.com/go-gota/gota/dataframe"
 	"github.com/smoothingMethod"
 )
 
@@ -27,7 +29,7 @@ func main() {
 
 	search := make(map[string]int)
 	i = 0
-	f, err := os.Open("../sample2.csv")
+	f, err := os.Open("sample2.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -76,4 +78,39 @@ func main() {
 	predict := smoothingMethod.Predict(MAResult, DMAResult, N, search[tempT], 3)
 	fmt.Println(predict)
 
+	f2, err := os.Open("sample3.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f2.Close()
+	DF := dataframe.ReadCSV(f2)
+
+	var training, test []float64
+	training, test = evaluation.MakeTrainingData(DF.Col("case").Float())
+	fmt.Println("\n\ntraining")
+	fmt.Println(training)
+	fmt.Println("\n\ntest")
+	fmt.Println(test)
+	fmt.Println("\n\n")
+	fmt.Println(DF)
+
+	alpha := smoothingMethod.GetAlphaOfBrown(training, test, len(training)-1)
+	fmt.Println(alpha)
+
+	y, err := DF.Col("\ufeffyear").Int()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var ewma []float64
+	ewma = smoothingMethod.EWMAs(DF.Col("case").Float(), 0.2)
+
+	for i, v := range ewma {
+		fmt.Println(y[i], ":", v)
+	}
+	println("\n\n\n")
+	brown := smoothingMethod.Brown(ewma, 0.2)
+	for i, v := range brown {
+		fmt.Println(y[i], ":", v)
+	}
+	smoothingMethod.PrintFormulaOfBrown(ewma, brown, 0.2, DF.Nrow()-4)
 }
