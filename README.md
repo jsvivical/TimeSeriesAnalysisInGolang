@@ -8,3 +8,8 @@ What I have to add
 2.Halt's two parameter linear exponential smoothing
 3.Winters' multiplicative seasonal exponential smoothing
 4.Winters' additive seasonal exponential smoothing
+5.ACF
+6.PACF
+7.AR model
+8.ARMA model 
+9.ARIMA model
