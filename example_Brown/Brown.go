@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/evaluation"
 	"github.com/go-gota/gota/dataframe"
 	"github.com/smoothingMethod"
 )
@@ -23,13 +22,6 @@ func main() {
 	//데이터 확인용
 	fmt.Println(DF)
 
-	//최적 alpha 구하기
-	//먼저 훈련용, 테스트용 데이터 생성함
-	var training, test []float64
-	training, test = evaluation.MakeTrainingData(DF.Col("case").Float())
-	alpha := smoothingMethod.GetAlphaOfBrown(training, test, len(training)-1)
-	//최적 알파 확인
-	fmt.Println(alpha)
 	//연도 저장
 	year, err := DF.Col("\ufeffyear").Int()
 	if err != nil {
@@ -37,17 +29,43 @@ func main() {
 	}
 	//ewma를 저장할 변수 선언
 	var ewma []float64
-	ewma = smoothingMethod.EWMAs(DF.Col("case").Float(), 0.2) //alpha는 임의의 값으로 하였음
+	ewma = smoothingMethod.EWMAs(DF.Col("case").Float(), 0.41) //alpha는 임의의 값으로 하였음
 
 	for i, v := range ewma {
 		fmt.Println(year[i], " : ", v)
 	}
 	fmt.Println("\n\n\n")
 
-	brown := smoothingMethod.Brown(ewma, 0.2)
+	brown := smoothingMethod.Brown(ewma, 0.41)
 	for i, v := range brown {
 		fmt.Println(year[i], ":", v)
 	}
-	smoothingMethod.PrintFormulaOfBrown(ewma, brown, 0.2, DF.Nrow()-4)
+	yearToIndex := make(map[int]int)
+	for i, v := range year {
+		yearToIndex[v] = i
+	}
+	smoothingMethod.PrintFormulaOfBrown(ewma, brown, 0.41, yearToIndex[2013]) //2013년까지
+	smoothingMethod.BrownPredict(ewma, brown, 0.41, year, yearToIndex[2013], 5)
+
+	//방법2
+	brown2 := smoothingMethod.EWMAs(ewma, 0.41)
+	for i, v := range brown2 {
+		fmt.Println(year[i], ":", v)
+	}
+	//한 시점의 예측식으로부터 예측한 관측값들
+	var predicted []float64
+	fmt.Println("2013 T : ", yearToIndex[2013])
+
+	for i := -(yearToIndex[2013]); i <= 3; i++ {
+		predicted = append(predicted, smoothingMethod.BrownPredict2(ewma, brown, 0.41, yearToIndex[2013], i+2))
+	}
+
+	fmt.Println("\n\n\n")
+	for i, v := range predicted {
+		fmt.Println(year[i], ":", v)
+	}
+
+	alpha := smoothingMethod.GetAlpha(DF.Col("case").Float(), yearToIndex, 2013)
+	fmt.Println(alpha)
 
 }

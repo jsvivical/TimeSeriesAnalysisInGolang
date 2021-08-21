@@ -20,7 +20,7 @@ func MakeTrainingData(totalData []float64) (training []float64, test []float64) 
 
 func MSE(observed, predicted []float64) float64 {
 	var MSE float64
-	for i := 0; i < len(observed); i++ {
+	for i := 0; i < len(observed)-1; i++ {
 		MSE += math.Pow((observed[i]-predicted[i]), 2) / float64(len(observed))
 	}
 	return MSE

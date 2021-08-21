@@ -45,4 +45,10 @@ func main() {
 	for i, v := range dma {
 		fmt.Printf("[%d] %f\n", data[i], v)
 	} //이중이동평균(MA)출력
+
+	dma2 := smoothingMethod.MovingAverages(ma, N)
+	for i, v := range dma2 {
+		fmt.Printf("[%d] %f\n", data[i], v)
+	} //이중이동평균(MA)출력
+
 }
